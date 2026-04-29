@@ -1,0 +1,99 @@
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+int dobro(int a){return a*2;}
+int quadrado(int a){return a*a;}
+int absoluto(int a){return abs(a);}
+
+void processar(int (*operacao)(int), int **mat, int l, int c) {
+    for(int i = 0; i<l; i++){
+        for(int j = 0; j<c; j++){
+            int a = mat[i][j];
+            mat[i][j] = operacao(a);
+        }
+    }
+
+}
+
+
+int** alocacao(int l, int c) {
+    int **mat = (int**) malloc(l * sizeof(int*));
+    for(int i = 0 ; i < l; i++) {
+        mat[i] = (int*) malloc(c * sizeof(int));
+    }
+    return mat;
+}
+
+void valores(int **mat, int l, int c){
+
+    for(int i = 0; i < l; i++){
+        for(int j = 0; j<c; j++){
+            scanf("%d ", &mat[i][j]);
+        }
+    }
+
+
+}
+
+void imprimir(int **mat, int l, int c){
+
+    for(int i = 0; i<l; i++){
+        for(int j = 0; j<c; j++){
+            int a = mat[i][j];
+            printf("%d ", a);
+        }
+
+        printf("\n");
+    }
+
+}
+
+void liberar(int **mat, int l){
+
+    for(int i = 0; i<l; i++){
+        free(mat[i]);
+    }
+
+    free(mat);
+}
+
+int main() {
+    
+    int (*ptr)(int, int);
+    int l; int c;
+
+    scanf("%d %d", &l, &c);
+
+    int **mat = alocacao(l,c);
+
+    valores(mat, l, c);
+
+    int dec; scanf("%d", &dec);
+
+    switch(dec){
+
+        case 1:
+
+        ptr = dobro;
+        break;
+
+        case 2:
+
+        ptr = quadrado;
+        break;
+
+        case 3:
+
+        ptr = absoluto;
+        break;
+    }   
+    
+    processar(ptr, mat, l, c);
+    imprimir(mat, l, c);
+    liberar(mat, l);
+
+    return 0;
+}
