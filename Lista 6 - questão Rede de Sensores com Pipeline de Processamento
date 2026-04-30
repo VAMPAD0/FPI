@@ -1,0 +1,104 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <math.h>
+
+int calibracao(int a) { return a + 5; }
+
+int saturacao(int a) {
+    if (a < 80) {
+        return a;
+    } else {
+        return 80;
+    }
+}
+
+int amplificador(int a) { return a * 2; }
+
+void operacao(int (**processos)(int), int qtd_filtros, int **mat, int l, int c) {
+    for (int i = 0; i < l; i++) {
+        for (int j = 0; j < c; j++) {
+            for (int k = 0; k < qtd_filtros; k++) {
+                mat[i][j] = processos[k](mat[i][j]);
+            }
+        }
+    }
+}
+
+int main() {
+    int l, c; 
+    if (scanf("%d %d", &l, &c) != 2) return 1;
+
+    int **mat = (int**) malloc(l * sizeof(int*));
+    for (int i = 0; i < l; i++) {
+        mat[i] = (int*) malloc(c * sizeof(int));
+    }
+
+    for (int i = 0; i < l; i++) {
+        for (int j = 0; j < c; j++) {
+            scanf("%d", &mat[i][j]);
+        }
+    }
+
+    int (*lista_filtros[4])(int) = {NULL, calibracao, saturacao, amplificador};
+
+    int dec;
+    while (scanf("%d", &dec) == 1) {
+        
+        if (dec == 0) {
+            break;
+        }
+
+        if (dec >= 1 && dec <= 3) {
+            int (*pipeline_simples[1])(int);
+            pipeline_simples[0] = lista_filtros[dec];
+            
+            operacao(pipeline_simples, 1, mat, l, c);
+
+        } else if (dec == 4) {
+            int k;
+            scanf("%d", &k);
+            
+           int (**pipeline_complexo)(int) = (int (**)(int)) malloc(k * sizeof(int (*)(int)));
+            
+            for (int i = 0; i < k; i++) {
+                int id_filtro;
+                scanf("%d", &id_filtro);
+                pipeline_complexo[i] = lista_filtros[id_filtro];
+            }
+
+            operacao(pipeline_complexo, k, mat, l, c);
+        
+            free(pipeline_complexo);
+        }
+    }
+
+    printf("Matriz processada:\n");
+    
+    int critico_val = mat[0][0];
+    int critico_i = 0, critico_j = 0;
+
+    for (int i = 0; i < l; i++) {
+        for (int j = 0; j < c; j++) {
+            printf("%d", mat[i][j]);
+            if (j < c - 1) printf(" ");
+            
+            if (mat[i][j] > critico_val) {
+                critico_val = mat[i][j];
+                critico_i = i;
+                critico_j = j;
+            }
+        }
+        printf("\n");
+    }
+
+    printf("\nSensor critico: %d\n", critico_val);
+    printf("Posicao: (%d,%d)\n", critico_i, critico_j);
+
+    for (int i = 0; i < l; i++) {
+        free(mat[i]);
+    }
+    free(mat);
+
+    return 0;
+}
